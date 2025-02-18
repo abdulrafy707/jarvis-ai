@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { FaMicrophone } from 'react-icons/fa';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
 export default function Page() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
