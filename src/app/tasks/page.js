@@ -54,7 +54,7 @@ export default function TasksPage() {
 
     if (newTask.content) {
       try {
-        const response = await fetch( `${base_url}api/tasks/add`, {
+        const response = await fetch( `${base_url}/api/tasks/add`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(newTask),
@@ -84,7 +84,7 @@ export default function TasksPage() {
   // Delete a task
   const handleDeleteTask = async (id) => {
     try {
-      const response = await fetch(`${base_url}api/tasks/${id}`, {  // Use backticks for template literal
+      const response = await fetch(`${base_url}/api/tasks/${id}`, {  // Use backticks for template literal
         method: "DELETE",
       });
 
@@ -108,7 +108,7 @@ export default function TasksPage() {
         const taskId = editingTask.id;
 
         // Use backticks for string interpolation
-        const response = await fetch(`${base_url}api/tasks/edit/${taskId}`, {
+        const response = await fetch(`${base_url}/api/tasks/edit/${taskId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -197,7 +197,7 @@ export default function TasksPage() {
     try {
       if (tab === "active") {
         // API call to mark the task as completed
-        const response = await fetch(`${base_url}api/tasks/${taskId}/close`, {
+        const response = await fetch(`${base_url}/api/tasks/${taskId}/close`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
         });
@@ -223,7 +223,7 @@ export default function TasksPage() {
         }
       } else if (tab === "completed") {
         // API call to reopen task
-        const response = await fetch(`${base_url}api/tasks/${taskId}/reopen`, {
+        const response = await fetch(`${base_url}/api/tasks/${taskId}/reopen`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
         });
@@ -267,7 +267,7 @@ export default function TasksPage() {
    // Add a new task (voice)
    const handleAddVoiceTask = async (transcription) => {
     try {
-      const response = await fetch(`${base_url}api/tasks/voice`, {
+      const response = await fetch(`${base_url}/api/tasks/voice`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ transcription }),
