@@ -176,7 +176,6 @@
 // }
 
 
-
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -197,26 +196,31 @@ export default function VoiceAssistantPage() {
   
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        // Stop recognition when tab is not visible
         if (recognitionRef.current) recognitionRef.current.stop();
       } else {
-        // Restart recognition when tab becomes visible again
         if (recognitionRef.current && isListening) {
           recognitionRef.current.start();
         }
       }
     };
   
-    // Listen for visibility changes
     document.addEventListener("visibilitychange", handleVisibilityChange);
     
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  
   }, [isListening]);
   
-  // Initialize Speech Recognition
+  // New effect: cleanup recognition when the component unmounts (page change)
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+        console.log("Speech recognition stopped on unmount");
+      }
+    };
+  }, []);
+  
   const initializeRecognition = () => {
     if (!("webkitSpeechRecognition" in window)) {
       alert("Your browser does not support voice recognition.");
@@ -251,36 +255,28 @@ export default function VoiceAssistantPage() {
     recognition.start();
   };
   
-  // Speak text using browser's built-in speech synthesis
   const speakText = (text) => {
     if (!synthesisRef.current) {
       console.error("Speech synthesis not supported");
       return;
     }
   
-    // Stop any ongoing speech
     synthesisRef.current.cancel();
-  
-    // Create new utterance
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.volume = 1;
     utterance.rate = 1;
     utterance.pitch = 1;
     utterance.lang = "en-US";
   
-    // Find a suitable voice
     const voices = synthesisRef.current.getVoices();
-    utterance.voice = voices.find(voice => voice.lang === "en-US") || null;
+    utterance.voice = voices.find((voice) => voice.lang === "en-US") || null;
   
-    // Pause recognition while speaking
     if (recognitionRef.current) {
       recognitionRef.current.stop();
     }
   
-    // Speak the text
     synthesisRef.current.speak(utterance);
   
-    // Handle speech events
     utterance.onend = () => {
       if (recognitionRef.current) {
         recognitionRef.current.start();
@@ -298,11 +294,9 @@ export default function VoiceAssistantPage() {
   const handleSend = async (text) => {
     if (!text.trim()) return;
   
-    // Add the user's message to the conversation
     setMessages((prev) => [...prev, { sender: "user", text }]);
   
     try {
-      // Call your backend API to process the query and get a response
       const response = await fetch(`${base_url}/api/assistant/query`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -313,13 +307,13 @@ export default function VoiceAssistantPage() {
         throw new Error(`HTTP error: ${response.status}`);
       }
   
-      // Process the response and add the bot's reply to the conversation
       const data = await response.json();
-      const botMessage = typeof data.response === "string" ? data.response : JSON.stringify(data.response);
+      const botMessage =
+        typeof data.response === "string"
+          ? data.response
+          : JSON.stringify(data.response);
   
       setMessages((prev) => [...prev, { sender: "bot", text: botMessage }]);
-  
-      // Use text-to-speech to read the response
       speakText(botMessage);
     } catch (error) {
       console.error("Failed to get response from API:", error);
@@ -329,24 +323,27 @@ export default function VoiceAssistantPage() {
     }
   };
   
-
   return (
-    <div className="flex flex-col bg-black min-h-screen text-light ml-[20%]">
-      <section className="flex justify-center w-[800px] h-screen bg-black m-5">
-        <div className="w-[900px] px-8 py-4 bg-gray-900 rounded-lg shadow-lg flex flex-col">
-          <h2 className="text-center text-neonPink text-4xl font-extrabold glowing-text mb-4">
+    <div className="flex flex-col bg-black min-h-screen text-light md:ml-[5%]">
+      <section className="w-full max-w-full sm:max-w-3xl mx-auto h-screen bg-black m-5 px-4 sm:px-8">
+        <div className="w-full px-4 py-4 bg-gray-900 rounded-lg shadow-lg flex flex-col h-full">
+          <h2 className="text-center text-neonPink text-3xl sm:text-4xl font-extrabold glowing-text mb-4">
             JARVIS AI (Voice-Activated)
           </h2>
-          <div className="space-y-4 overflow-y-auto flex-grow p-4 rounded bg-gray-800">
+          <div className="flex-grow space-y-4 overflow-y-auto p-4 rounded bg-gray-800">
             {messages.map((msg, index) => (
-              <div key={index} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
->
+              <div
+                key={index}
+                className={`flex ${
+                  msg.sender === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
                 <div
                   className={`${
                     msg.sender === "user"
                       ? "bg-neonBlue text-black"
                       : "bg-gradient-to-r from-neonPink to-neonPurple text-white"
-                  } px-6 py-3 rounded-lg max-w-lg shadow-md`}
+                  } px-4 py-2 rounded-lg max-w-xs sm:max-w-lg shadow-md`}
                 >
                   {msg.text}
                 </div>
