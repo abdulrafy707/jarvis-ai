@@ -24,7 +24,8 @@ export default function Header({ sidebarOpen, setSidebarOpen }) {
       </div>
 
       <div className="flex items-center justify-between md:justify-end space-x-4">
-        <div className="text-light text-xs sm:text-sm">
+        {/* Hide this text on screens smaller than md */}
+        <div className="hidden md:block text-light text-xs sm:text-sm">
           Wake word:{" "}
           <span className="text-neonBlue font-semibold hover:text-neonPurple transition-all">
             "Hello Jarvis"
